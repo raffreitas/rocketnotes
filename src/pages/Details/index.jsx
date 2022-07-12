@@ -1,7 +1,7 @@
 import { Container, Links, Content } from "./styles"
 
 import { ButtonText } from "../../components/ButtonText"
-import { Button } from "../../components/Button/Details"
+import { Button } from "../../components/Button"
 import { Header } from "../../components/Header"
 import { Section } from "../../components/Section"
 import { Tag } from "../../components/Tags"
