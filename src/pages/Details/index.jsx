@@ -1,3 +1,8 @@
+import { useState, useEffect } from "react"
+import { useParams, useNavigate } from "react-router-dom"
+
+import { api } from "../../services/api"
+
 import { Container, Links, Content } from "./styles"
 
 import { ButtonText } from "../../components/ButtonText"
@@ -7,37 +12,89 @@ import { Section } from "../../components/Section"
 import { Tag } from "../../components/Tags"
 
 export function Details() {
+  const [data, setData] = useState(null);
+
+  const params = useParams();
+  const navigate = useNavigate();
+
+  function handleBack() {
+    navigate(-1);
+  }
+
+  async function handleRemove() {
+    const confirm = window.confirm("Deseja realmente excluir esta nota?");
+
+    if (confirm) {
+      await api.delete(`/notes/${params.id}`);
+      navigate(-1);
+    }
+  }
+
+  useEffect(() => {
+    async function fetchNote() {
+      const response = await api.get(`/notes/${params.id}`);
+      setData(response.data);
+    }
+
+    fetchNote();
+  }, []);
 
   return (
     <Container>
       <Header />
 
-      <main>
-        <Content>
-          <ButtonText title="Excluir nota" />
+      {
+        data &&
+        <main>
+          <Content>
+            <ButtonText
+              title="Excluir nota"
+              onClick={handleRemove}
+            />
 
-          <h1>Introdução ao React</h1>
+            <h1>{data.title}</h1>
 
-          <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Perspiciatis illo natus recusandae quos beatae aliquam distinctio nisi at reiciendis obcaecati consequatur modi alias dicta odio, expedita quaerat optio, est labore?
-          </p>
+            <p>{data.description}</p>
 
-          <Section title="Links úteis">
-            <Links>
-              <li><a href="#">https://rocketseat.com.br</a></li>
-              <li><a href="#">https://react.com</a></li>
-            </Links>
-          </Section>
+            {
+              data.links &&
+              <Section title="Links úteis">
+                <Links>
+                  {
+                    data.links.map(link => (
+                      <li key={String(link.id)}>
+                        <a href={link.url} target="_blank">
+                          {link.url}
+                        </a>
+                      </li>
+                    ))
+                  }
+                </Links>
+              </Section>
+            }
 
-          <Section title="Marcadores">
-            <Tag title="express" />
-            <Tag title="nodejs" />
-          </Section>
+            {
+              data.tags &&
+              <Section title="Marcadores">
+                {
+                  data.tags.map(tag => (
+                    <Tag
+                      key={String(tag.id)}
+                      title={tag.name}
+                    />
+                  ))
+                }
+              </Section>
+            }
 
+            <Button
+              title="Voltar"
+              onClick={handleBack}
+            />
+          </Content>
+        </main>
 
-          <Button title="Voltar" loading />
-        </Content>
-      </main>
+      }
 
     </Container>
   )
